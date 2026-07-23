@@ -1,26 +1,35 @@
 #!/usr/bin/env bash
 
-# Mostra l'utilizzo dei filesystem montati
+# Controlla l'utilizzo dei filesystem montati.
+# Mostra solo filesystem reali e segnala eventuali soglie critiche.
 # Autore: Matteo Di Lonardo
 
-df -hP | awk '
-NR == 1 {
-    print
-    next
-}
+WARNING_THRESHOLD=80
+CRITICAL_THRESHOLD=90
 
-{
-    gsub("%", "", $5)
+printf "%-25s %8s %8s %8s %6s %-30s %s\n" \
+    "FILESYSTEM" "SIZE" "USED" "AVAIL" "USE%" "MOUNTPOINT" "STATUS"
 
-    if ($5 >= 90) {
+df -hP \
+    -x tmpfs \
+    -x devtmpfs \
+    -x squashfs \
+    -x overlay |
+awk -v warning="$WARNING_THRESHOLD" -v critical="$CRITICAL_THRESHOLD" '
+NR > 1 {
+    utilizzo = $5
+    gsub("%", "", utilizzo)
+
+    if (utilizzo >= critical) {
         stato = "CRITICO"
     }
-    else if ($5 >= 80) {
+    else if (utilizzo >= warning) {
         stato = "ATTENZIONE"
     }
     else {
         stato = "OK"
     }
 
-    print $0, stato
+    printf "%-25s %8s %8s %8s %5s%% %-30s %s\n",
+        $1, $2, $3, $4, utilizzo, $6, stato
 }'
