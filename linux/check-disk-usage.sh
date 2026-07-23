@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
-# Controlla l'utilizzo dei filesystem montati.
-# Mostra solo filesystem reali e segnala eventuali soglie critiche.
+# Controlla l'utilizzo dei filesystem montati
 # Autore: Matteo Di Lonardo
 
 WARNING_THRESHOLD=80
